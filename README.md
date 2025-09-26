@@ -1,12 +1,16 @@
-# nano-exporter
+# nano-exporter2
 
 A minimalistic exporter of node metrics for the Prometheus monitoring
 system.
 
-## Word of Warning
+## Notice
 
-This is not an officially supported Google product. It's also
-definitely not *used* by Google.
+This is a fork of [nano-exporter] (written by Heikki Kallasjoki <fis@zem.fi>),
+with additional plugins written by Leah Neukirchen <leah@vuxu.org>.
+
+[nano-exporter]: https://github.com/fis/nano-exporter
+
+## Word of Warning
 
 There are no particularly compelling reasons to use this software over
 the alternatives. On a Real Computer™, the standard [Prometheus node
@@ -37,33 +41,6 @@ of the build if you don't need them.
 
 The metrics collection is highly Linux-specific. You probably won't
 have much luck on other operating systems.
-
-### Including in an OpenWrt build
-
-If you're building an OpenWrt system, you can include this program by
-adding the following line to your `feeds.conf` file:
-
-```
-src-git nanoexporter https://github.com/fis/nano-exporter.git;openwrt
-```
-
-Then update the feed, and install the package:
-
-```shell
-./scripts/feeds update nanoexporter
-./scripts/feeds install -p nanoexporter -a
-```
-
-The package `nano-exporter` should now be available in `make
-menuconfig`, under the "Utilities" heading.
-
-## Issues and contributions
-
-Please report any issues on the [GitHub issues
-page](https://github.com/fis/nano-exporter/issues).
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to
-contribute patches and other code.
 
 ## Collectors
 
