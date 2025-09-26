@@ -129,4 +129,9 @@ ssize_t read_file_at(int dirfd, char *pathname, char *buf, size_t bufsiz);
 #define PATH(p) p
 #endif // PATH
 
+#ifndef GLOB_ONLYDIR
+// glibc extension, optimization only
+#define GLOB_ONLYDIR 0
+#endif
+
 #endif // NANO_EXPORTER_UTIL_H_
