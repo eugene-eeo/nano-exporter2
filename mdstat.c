@@ -1,3 +1,6 @@
+// Copyright (C) 2024-2025 Leah Neukirchen <leah@vuxu.org>
+// SPDX-License-Identifier: Apache-2.0
+
 #define _GNU_SOURCE
 #include <fcntl.h>
 #include <glob.h>

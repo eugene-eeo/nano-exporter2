@@ -1,3 +1,6 @@
+// Copyright (C) 2024-2025 Leah Neukirchen <leah@vuxu.org>
+// SPDX-License-Identifier: Apache-2.0
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
