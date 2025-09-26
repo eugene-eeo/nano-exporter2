@@ -54,15 +54,26 @@ including generated metrics, labels and configuration options.
 
 | Name | Description |
 | ---- | ----------- |
+| [`conntrack`](#conntrack) | Connection tracking (NAT) statistics. |
 | [`cpu`](#cpu) | CPU usage from `/proc/stat` and CPU frequency scaling data from sysfs. |
 | [`diskstats`](#diskstats) | Disk I/O statistics from `/proc/diskstats`. |
+| [`filefd`](#filefd) | File descriptor usage statistics. |
 | [`filesystem`](#filesystem) | Statistics of mounted filesystems from `statvfs(2)`. |
 | [`hwmon`](#hwmon) | Temperature, fan and voltage sensors from `/sys/class/hwmon`. |
+| [`loadavg`](#loadavg) | Load average statistics. |
+| [`mdstat`](#mdstat) | Multiple Device driver (Software RAID) information. |
 | [`meminfo`](#meminfo) | Memory usage statistics from `/proc/meminfo`. |
 | [`netdev`](#netdev) | Network device transmit/receive statistics from `/proc/net/dev`. |
+| [`netif`](#netif) | Network interface information. |
+| [`pressure`](#pressure) | Pressure Stall Information metrics. |
+| [`rapl`](#rapl) | Running Average Power Limit statistics. |
+| [`schedstat`](#schedstat) | Scheduler statistics. |
 | [`stat`](#stat) | Basic statistics from `/proc/stat`. |
 | [`textfile`](#textfile) | Custom metrics from `.prom` text files dropped in a directory. |
+| [`timex`](#timex) | Selected adjtimex(2) system call stats. |
 | [`uname`](#uname) | Node information returned by the `uname` system call. |
+| [`vmstat`](#vmstat) | Virtual Memory statistics. |
+| [`zfs`](#zfs) | Basic ZFS information. |
 
 ## Usage
 
@@ -78,13 +89,18 @@ collectors may also accept further arguments, which will always have
 the prefix `--{collector}-`. They are documented in the [Collector
 Reference](#collector-reference) section.
 
-| Flag | Description |
-| ---- | ----------- |
-| `--foreground` | Don't daemonize, but remain on the foreground instead. |
-| `--pidfile=F` | After daemonizing, write the PID of the process to file at *F*. No effect if combined with `--foreground`. |
-| `--port=X` | Listen on port *X* instead of the default port (9100). |
+| Flag          | Description                                            |
+| ----          | -----------                                            |
+| `--port=X`    | Listen on port *X* instead of the default port (9100). |
+| `--host=HOST` | Bind on HOST only (by default: all interfaces).        |
+| `--stdout`    | Gather metrics once and print them to standard output. |
 
 ## Collector Reference
+
+### `conntrack`
+
+* `node_nf_conntrack_entries`: Number of currently allocated flow entries in conntrack.
+* `node_nf_conntrack_max`: Maximum size of the connection tracking table.
 
 ### `cpu`
 
@@ -155,10 +171,18 @@ the `*`; otherwise, the match must be exact.
 By default, if the device is entirely unused (all metrics are 0), it's
 omitted. Use `--diskstats-keep-unused` to include even those devices.
 
+### `filefd`
+
+Metrics:
+
+* `node_filefd_allocated`: Number of currently used file descriptors.
+* `node_filefd_maximum`: Maximum number of file descriptors available.
+
 ### `filesystem`
 
 Metrics:
 
+* `node_filesystem_device_error`: If set, `errno` during metrics collection.
 * `node_filesystem_size_bytes`: Total size of the filesystem.
 * `node_filesystem_free_bytes`: Number of free bytes in the
   filesystem.
@@ -221,6 +245,14 @@ built-in scaling.
 (TODO: potential future feature: configurable scaling via command line
 options.)
 
+### `loadavg`
+
+Metrics:
+
+* `node_load1`: Load average for the last minute.
+* `node_load5`: Load average for the last 5 minutes.
+* `node_load15`: Load average for the last 15 minutes.
+
 ### `meminfo`
 
 The `meminfo` collector exposes all the rows from `/proc/meminfo`
@@ -232,6 +264,29 @@ removed.
 If the line in `/proc/meminfo` has a `kB` suffix, the suffix `_bytes`
 is also appended to the metric name, and the value multiplied by 1024
 to convert it to bytes.
+
+### `mdstat`
+
+Multiple Device driver (Software RAID) information.
+
+Metrics:
+
+* `node_md_level`: `raid1` etc.
+* `node_md_disks`: number of disks in RAID
+* `node_md_metadata_version`
+* `node_md_state`
+* `node_md_chunk_size`
+* `node_md_degraded_disks`: number of degraded disks in RAID
+* `node_md_sync_action`
+* `node_md_sync_completed`
+* `node_md_sync_speed`
+* `node_md_disk_state`
+
+Labels:
+
+* `device`
+* `disk`
+* `state`
 
 ### `netdev`
 
@@ -268,6 +323,57 @@ list are included. If the given value ends in `*`, it matches any
 string that begins with the part before the `*`; otherwise, the match
 must be exact.
 
+### `netif`
+
+Network interface statistics:
+
+Metrics:
+
+* `node_network_mtu_bytes`
+* `node_network_carrier`
+* `node_network_carrier_changes_total`
+* `node_network_up`
+* `node_network_speed_bytes`
+
+Labels:
+
+* `device`
+
+### `pressure`
+
+PSI (Pressure Stall Information) statistics.
+
+Metrics:
+
+* `node_pressure_cpu_waiting_seconds_total`
+* `node_pressure_memory_waiting_seconds_total`
+* `node_pressure_memory_stalled_seconds_total`
+* `node_pressure_io_waiting_seconds_total`
+* `node_pressure_io_stalled_seconds_total`
+
+### `rapl`
+
+Running Average Power Limit.
+
+Metrics:
+
+* `node_rapl_joules_total`
+
+Labels:
+
+* `rapl_zone`
+* `name`
+
+### `schedstat`
+
+Scheduler statistics.
+
+Metrics:
+
+* `node_schedstat_running_seconds_total`
+* `node_schedstat_waiting_seconds_total`
+* `node_schedstat_timeslices_total`
+
 ### `stat`
 
 This collectors exports the following metrics from `/proc/stat`:
@@ -294,6 +400,34 @@ the files conform to the Prometheus exposition format. The only
 modification done is to add a terminating newline to the file, is one
 is not already present.
 
+### `timex`
+
+Selected adjtimex(2) system call stats.
+
+Metrics:
+
+* `node_timex_sync_status`
+* `node_timex_estimated_error_seconds`
+* `node_timex_frequency_adjustment_ratio`
+* `node_timex_loop_time_constant`
+* `node_timex_maxerror_seconds`
+* `node_timex_offset_seconds`
+* `node_timex_status`
+* `node_timex_tai_offset_seconds`
+* `node_timex_tick_seconds`
+* `node_time_seconds`
+* `node_clock_tai_seconds`
+* `node_clock_monotonic_seconds`
+* `node_clock_boottime_seconds`
+* `node_timex_pps_calibraton_total`
+* `node_timex_pps_error_total`
+* `node_timex_pps_frequency_hertz`
+* `node_timex_pps_jitter_seconds`
+* `node_timex_pps_jitter_total`
+* `node_timex_pps_shift_seconds`
+* `node_timex_pps_stability_exceeded_total`
+* `node_timex_pps_stability_hertz`
+
 ### `uname`
 
 The `uname` collector exports data from the eponymous system call as
@@ -307,3 +441,25 @@ value 1. The attached labels are:
 * `version`
 
 See your `uname(2)` man page for details of the values.
+
+### `vmstat`
+
+Virtual memory statistics.
+
+Metrics:
+
+* `node_vmstat_oom_kill`: Number of ouf-of-memory kills.
+* `node_vmstat_pgfault`: Number of page faults.
+* `node_vmstat_pgmajfault`: Number of major page faults.
+* `node_vmstat_pgpgin`: Number of page-ins.
+* `node_vmstat_pgpgout`: Number of page-outs.
+* `node_vmstat_pswpin`: Number of swap-ins.
+* `node_vmstat_pswpout`: Number of swap-outs.
+
+### `zfs`
+
+ZFS Pool state.
+
+Metrics:
+
+* `node_zfs_zpool_state`
